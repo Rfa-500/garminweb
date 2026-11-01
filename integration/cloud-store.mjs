@@ -21,5 +21,5 @@ export async function readCloudState(){
   return {state:await new Response(result.stream).json(),etag:result.blob.etag};
 }
 export async function writeCloudState(state,etag){
-  return put(pathname,JSON.stringify(state),{access:'private',addRandomSuffix:false,contentType:'application/json',...(etag?{ifMatch:etag}:{allowOverwrite:false})});
+  return put(pathname,JSON.stringify(state),{access:'private',addRandomSuffix:false,contentType:'application/json',...(etag?{ifMatch:etag,allowOverwrite:true}:{allowOverwrite:false})});
 }

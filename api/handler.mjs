@@ -31,7 +31,7 @@ export default async function handler(req,res){
     if(req.method==='POST'&&route==='import'){
       const raw={...state.raw,archive:combineArchives(state.raw.archive,body)};
       const next=buildState(raw,state.goals,state.profile);
-      try{await writeCloudState(next,etag);}catch(error){console.error('History persistence failed',error.name);return send(409,{error:'Data changed while importing. Please try again.'});}
+      try{await writeCloudState(next,etag);}catch(error){console.error('History persistence failed',error.constructor.name);return send(409,{error:'Data changed while importing. Please try again.'});}
       return send(200,{snapshot:next.snapshot});
     }
     if(req.method==='POST'&&route==='refresh'){
@@ -44,9 +44,9 @@ export default async function handler(req,res){
       const value=route==='goals'?validateGoals(body):validateProfile(body);
       if(value.version!==state[route].version+1)return send(409,{error:'Reload the current settings'});
       const next=buildState(state.raw,route==='goals'?value:state.goals,route==='profile'?value:state.profile);
-      try{await writeCloudState(next,etag);}catch(error){console.error('Settings persistence failed',error.name);return send(409,{error:'Settings changed. Reload before saving.'});}
+      try{await writeCloudState(next,etag);}catch(error){console.error('Settings persistence failed',error.constructor.name);return send(409,{error:'Settings changed. Reload before saving.'});}
       return send(200,value);
     }
     return send(404,{error:'Not found'});
-  }catch(error){console.error('Private dashboard request failed',error.name);return send(503,{error:'Showing the latest saved information'});}
+  }catch(error){console.error('Private dashboard request failed',error.constructor.name);return send(503,{error:'Showing the latest saved information'});}
 }
