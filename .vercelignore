@@ -1,0 +1,6 @@
+.env*
+.local/
+.openai/
+.git/
+node_modules/
+*.zip

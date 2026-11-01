@@ -1,0 +1,1288 @@
+{
+  "verifiedOn": "2026-10-31",
+  "baseUrl": "https://personal.connectapi.garmin.com",
+  "sources": {
+    "swaggerPage": "https://developer.garmin.com/gc-developer-program/personal/swagger-docs/",
+    "embeddedSchemaBundle": "https://developer.garmin.com/component---src-pages-gc-developer-program-personal-swagger-docs-js-715115a6210d45afc282.js",
+    "officialClient": "https://github.com/garmin/connect-personal-api-python/blob/main/src/garmin_personal_api/client.py",
+    "auth": "https://developer.garmin.com/gc-developer-program/personal/personal-api/"
+  },
+  "auth": {
+    "method": "POST",
+    "path": "/personalapitoken-service/personal-api/personal-api-key/token",
+    "authorizationScheme": "ApiKey",
+    "response": "Raw JWT text; not a JSON access_token envelope",
+    "dataAuthorizationScheme": "Bearer",
+    "credentialsIncluded": false
+  },
+  "notes": [
+    "Public documentation only. No account data or credentials are in this inventory.",
+    "Date arguments are YYYY-MM-DD. Range wrappers document inclusive dates.",
+    "API availability does not imply every field is present for this device/account. Treat absent, null and 204 as missing data.",
+    "Query parameters/defaults are from Swagger; Python client activity search uses its own default limit of 20.",
+    "Response schema descriptions are not sample user data. Full public reference is in garmin-openapi.json.",
+    "Do not infer undocumented units for sleepNeed.actual/baseline or self-reported exertion scales.",
+    "No standalone training-readiness, training-status, skin-temperature, or recovery-time endpoint appears in this inspected Swagger. Do not call guessed paths."
+  ],
+  "endpoints": [
+    {
+      "method": "GET",
+      "path": "/activity-service/activity/{activityId}",
+      "group": "Activity",
+      "parameters": [
+        {
+          "name": "activityId",
+          "in": "path",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "response": {
+        "200": {
+          "application/json": "ActivitySummaryDTO"
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/activity-service/activity/{activityId}/workouts",
+      "group": "Activity",
+      "parameters": [
+        {
+          "name": "activityId",
+          "in": "path",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "response": {
+        "200": {
+          "application/json": [
+            "ActivityWorkoutDTO"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/activitylist-service/activities/search/activities",
+      "group": "Activity",
+      "parameters": [
+        {
+          "name": "start",
+          "in": "query",
+          "required": false,
+          "type": "integer",
+          "default": 0
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "type": "integer",
+          "default": 99
+        },
+        {
+          "name": "favorite",
+          "in": "query",
+          "required": false,
+          "type": "integer",
+          "default": -1
+        },
+        {
+          "name": "sortOrder",
+          "in": "query",
+          "required": false,
+          "type": "string",
+          "default": "desc"
+        },
+        {
+          "name": "excludeChildren",
+          "in": "query",
+          "required": false,
+          "type": "boolean",
+          "default": true
+        },
+        {
+          "name": "sortBy",
+          "in": "query",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "name": "search",
+          "in": "query",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "name": "activityType",
+          "in": "query",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "name": "activitySubType",
+          "in": "query",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "name": "eventType",
+          "in": "query",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "name": "minDistance",
+          "in": "query",
+          "required": false,
+          "type": "integer"
+        },
+        {
+          "name": "maxDistance",
+          "in": "query",
+          "required": false,
+          "type": "integer"
+        },
+        {
+          "name": "minDuration",
+          "in": "query",
+          "required": false,
+          "type": "integer"
+        },
+        {
+          "name": "maxDuration",
+          "in": "query",
+          "required": false,
+          "type": "integer"
+        },
+        {
+          "name": "minElevation",
+          "in": "query",
+          "required": false,
+          "type": "integer"
+        },
+        {
+          "name": "maxElevation",
+          "in": "query",
+          "required": false,
+          "type": "integer"
+        },
+        {
+          "name": "startDate",
+          "in": "query",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "name": "endDate",
+          "in": "query",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "name": "upperLatitude",
+          "in": "query",
+          "required": false,
+          "type": "number"
+        },
+        {
+          "name": "rightLongitude",
+          "in": "query",
+          "required": false,
+          "type": "number"
+        },
+        {
+          "name": "lowerLatitude",
+          "in": "query",
+          "required": false,
+          "type": "number"
+        },
+        {
+          "name": "leftLongitude",
+          "in": "query",
+          "required": false,
+          "type": "number"
+        },
+        {
+          "name": "lowerMaxDepth",
+          "in": "query",
+          "required": false,
+          "type": "integer"
+        },
+        {
+          "name": "upperMaxDepth",
+          "in": "query",
+          "required": false,
+          "type": "integer"
+        },
+        {
+          "name": "decoDive",
+          "in": "query",
+          "required": false,
+          "type": "boolean"
+        },
+        {
+          "name": "minElapsedDuration",
+          "in": "query",
+          "required": false,
+          "type": "integer"
+        },
+        {
+          "name": "maxElapsedDuration",
+          "in": "query",
+          "required": false,
+          "type": "integer"
+        },
+        {
+          "name": "minBottomTime",
+          "in": "query",
+          "required": false,
+          "type": "integer"
+        },
+        {
+          "name": "maxBottomTime",
+          "in": "query",
+          "required": false,
+          "type": "integer"
+        },
+        {
+          "name": "minAvgPower",
+          "in": "query",
+          "required": false,
+          "type": "integer"
+        },
+        {
+          "name": "excludedActivitySubType",
+          "in": "query",
+          "required": false,
+          "type": [
+            "string"
+          ]
+        },
+        {
+          "name": "requiredField",
+          "in": "query",
+          "required": false,
+          "type": [
+            "string"
+          ]
+        }
+      ],
+      "response": {
+        "200": {
+          "application/json": [
+            "SummarizedActivityDTO"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/biometric-service/heartRateZones/v2",
+      "group": "Health",
+      "parameters": [
+        {
+          "name": "generateDefaults",
+          "in": "query",
+          "required": false,
+          "type": "boolean",
+          "default": true
+        }
+      ],
+      "response": {
+        "200": {
+          "application/json": [
+            "HeartRateZonesDTO"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/download-service/files/activity/{activityId}",
+      "group": "Activity",
+      "parameters": [
+        {
+          "name": "activityId",
+          "in": "path",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "response": {
+        "200": {
+          "application/x-zip-compressed": "unspecified"
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/fitnessage-service/fitnessage/v2/{calendarDate}",
+      "group": "Health",
+      "parameters": [
+        {
+          "name": "calendarDate",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "fullHistoryScan",
+          "in": "query",
+          "required": false,
+          "type": "boolean",
+          "default": true
+        }
+      ],
+      "response": {
+        "200": {
+          "application/json": [
+            "FitnessAgeDTO"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/goal-service/goal/user/effective/weightgoal/{startDate}/{endDate}",
+      "group": "Health",
+      "parameters": [
+        {
+          "name": "startDate",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "endDate",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "response": {
+        "200": {
+          "application/json": "UserGoalsRangeDTO"
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/hrv-service/hrv/{calendarDate}",
+      "group": "Health",
+      "parameters": [
+        {
+          "name": "calendarDate",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "response": {
+        "200": {
+          "application/json": "HrvChartDTO"
+        },
+        "204": {}
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/hrv-service/hrv/daily/{fromDate}/{toDate}",
+      "group": "Health",
+      "parameters": [
+        {
+          "name": "fromDate",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "toDate",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "response": {
+        "200": {
+          "application/json": "HrvDailySummaryDTO"
+        },
+        "204": {}
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/nutrition-service/food/logs/{date}",
+      "group": "Health",
+      "parameters": [
+        {
+          "name": "includeGoals",
+          "in": "query",
+          "required": false,
+          "type": "boolean",
+          "default": true
+        },
+        {
+          "name": "includeNutrition",
+          "in": "query",
+          "required": false,
+          "type": "boolean",
+          "default": true
+        },
+        {
+          "name": "includeMedia",
+          "in": "query",
+          "required": false,
+          "type": "boolean",
+          "default": true
+        },
+        {
+          "name": "mealId",
+          "in": "query",
+          "required": false,
+          "type": "integer"
+        },
+        {
+          "name": "date",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "response": {
+        "200": {
+          "application/json": "DailyNutritionSummaryDTO"
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/periodichealth-service/menstrualcycle/summary/{calendarDate}",
+      "group": "Women's Health",
+      "parameters": [
+        {
+          "name": "calendarDate",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "response": {
+        "200": {
+          "application/json": "MenstrualCycleSummaryDTO"
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/periodichealth-service/menstrualcycle/dayview/{calendarDate}",
+      "group": "Women's Health",
+      "parameters": [
+        {
+          "name": "calendarDate",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "todayDate",
+          "in": "query",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "name": "reducedResponse",
+          "in": "query",
+          "required": false,
+          "type": "boolean",
+          "default": false
+        },
+        {
+          "name": "skipbm",
+          "in": "query",
+          "required": false,
+          "type": "boolean",
+          "default": false
+        },
+        {
+          "name": "includeAnalysis",
+          "in": "query",
+          "required": false,
+          "type": "boolean",
+          "default": false
+        }
+      ],
+      "response": {
+        "200": {
+          "application/json": "DetailedMenstrualCycleDayDTO"
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/sleep-service/sleep/dailySleep",
+      "group": "Health",
+      "parameters": [
+        {
+          "name": "date",
+          "in": "query",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "response": {
+        "200": {
+          "application/json": "DailySleepDTO"
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/sleep-service/sleep/dailySleepSummariesByDate",
+      "group": "Health",
+      "parameters": [
+        {
+          "name": "startDate",
+          "in": "query",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "name": "endDate",
+          "in": "query",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "response": {
+        "200": {
+          "application/json": [
+            "DailySleepDTO"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/userprofile-service/userprofile/settings",
+      "group": "User Profile",
+      "parameters": [],
+      "response": {
+        "200": {
+          "application/json": "UserSettingsDTO"
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/usersummary-service/stats/hydration/daily/{startDate}/{endDate}",
+      "group": "Health",
+      "parameters": [
+        {
+          "name": "startDate",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "endDate",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "response": {
+        "200": {
+          "application/json": [
+            "UserDailyHydrationDTO"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/usersummary-service/stats/steps/daily/{startDate}/{endDate}",
+      "group": "Health",
+      "parameters": [
+        {
+          "name": "startDate",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "endDate",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "response": {
+        "200": {
+          "application/json": [
+            "StepsDailyStatDTO"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/usersummary-service/stats/stress/daily/{startDate}/{endDate}",
+      "group": "Health",
+      "parameters": [
+        {
+          "name": "startDate",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "endDate",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "response": {
+        "200": {
+          "application/json": [
+            "MultiValueWellnessChartItemDTO"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/usersummary-service/usersummary/daily",
+      "group": "Health",
+      "parameters": [
+        {
+          "name": "calendarDate",
+          "in": "query",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "response": {
+        "200": {
+          "application/json": "UserDailySummaryDto"
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/usersummary-service/v2/dailysummaries",
+      "group": "Health",
+      "parameters": [
+        {
+          "name": "startDate",
+          "in": "query",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "name": "endDate",
+          "in": "query",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "response": {
+        "200": {
+          "application/json": "ApiDocumentListUserDailySummaryV2DTO"
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/weight-service/weight/all/{startDate}/{endDate}",
+      "group": "Health",
+      "parameters": [
+        {
+          "name": "startDate",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "endDate",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "response": {
+        "200": {
+          "application/json": [
+            "DateWeightDTO"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/weight-service/weight/range/{startDate}/{endDate}",
+      "group": "Health",
+      "parameters": [
+        {
+          "name": "startDate",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "endDate",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "includeAll",
+          "in": "query",
+          "required": false,
+          "type": "boolean",
+          "default": false
+        }
+      ],
+      "response": {
+        "200": {
+          "application/json": "WeightRangeDTO"
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/wellness-service/wellness/bodyBattery/reports/daily",
+      "group": "Health",
+      "parameters": [
+        {
+          "name": "startDate",
+          "in": "query",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "name": "endDate",
+          "in": "query",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "name": "chunks",
+          "in": "query",
+          "required": false,
+          "type": "integer"
+        }
+      ],
+      "response": {
+        "200": {
+          "application/json": [
+            "BodyBatteryDailyReportDTO"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/wellness-service/wellness/daily/spo2acclimation/{calendarDate}",
+      "group": "Health",
+      "parameters": [
+        {
+          "name": "calendarDate",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "response": {
+        "200": {
+          "application/json": "DailySpO2AndAcclimationDTO"
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/wellness-service/wellness/dailyHeartRate",
+      "group": "Health",
+      "parameters": [
+        {
+          "name": "date",
+          "in": "query",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "response": {
+        "200": {
+          "application/json": "DailyHeartRateDTO"
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/wellnessactivity-service/activity/summary/range/{fromDate}/{untilDate}",
+      "group": "Activity",
+      "parameters": [
+        {
+          "name": "fromDate",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "untilDate",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "response": {
+        "200": {
+          "application/json": [
+            "WellnessActivitySummaryDTO"
+          ]
+        }
+      }
+    }
+  ],
+  "selectedSchemas": {
+    "DailySleepDTO": {
+      "id": "integer",
+      "userProfilePK": "integer",
+      "calendarDate": "string",
+      "sleepTimeSeconds": "integer",
+      "napTimeSeconds": "integer",
+      "sleepWindowConfirmed": "boolean",
+      "sleepWindowConfirmationType": "string",
+      "sleepStartTimestampGMT": "string",
+      "sleepEndTimestampGMT": "string",
+      "sleepStartTimestampLocal": "string",
+      "sleepEndTimestampLocal": "string",
+      "autoSleepStartTimestampGMT": "string",
+      "autoSleepEndTimestampGMT": "string",
+      "sleepQualityTypePK": "string",
+      "sleepResultTypePK": "string",
+      "unmeasurableSleepSeconds": "integer",
+      "deepSleepSeconds": "integer",
+      "lightSleepSeconds": "integer",
+      "remSleepSeconds": "integer",
+      "awakeSleepSeconds": "integer",
+      "deviceRemCapable": "boolean",
+      "sleepFromDevice": "boolean",
+      "averageSpO2Value": "number",
+      "lowestSpO2Value": "integer",
+      "highestSpO2Value": "integer",
+      "numberOfEventsBelowThreshold": "integer",
+      "averageSpO2HRSleep": "number",
+      "spo2Threshold": "integer",
+      "averageRespirationValue": "number",
+      "lowestRespirationValue": "number",
+      "highestRespirationValue": "number",
+      "awakeCount": "integer",
+      "avgSleepStress": "number",
+      "ageGroup": "string",
+      "avgHeartRate": "number",
+      "sleepScoreFeedback": "string",
+      "sleepScoreInsight": "string",
+      "sleepScorePersonalizedInsight": "string",
+      "sleepScores": {
+        "mapValues": "SleepScoreItem"
+      },
+      "userNote": "string",
+      "kidSleepNote": "string",
+      "sleepVersion": "integer",
+      "sleepNeed": "SleepNeedDTO",
+      "nextSleepNeed": "SleepNeedDTO",
+      "dailyNapDTOS": [
+        "DailyNapDTO"
+      ],
+      "breathingDisruptionSeverity": "string",
+      "sleepAlignment": "SleepAlignmentDto"
+    },
+    "SleepScoreItem": {
+      "value": "integer",
+      "qualifierKey": "string",
+      "optimalStart": "number",
+      "optimalEnd": "number",
+      "idealStartInSeconds": "number",
+      "idealEndInSeconds": "number"
+    },
+    "SleepNeedDTO": {
+      "userProfilePk": "integer",
+      "calendarDate": "string",
+      "deviceId": "integer",
+      "timestampGmt": "string",
+      "baseline": "integer",
+      "actual": "integer",
+      "feedback": "string",
+      "trainingFeedback": "string",
+      "sleepHistoryAdjustment": "string",
+      "hrvAdjustment": "string",
+      "napAdjustment": "string",
+      "displayedForTheDay": "boolean",
+      "recommendedBedtimeStartMins": "integer",
+      "recommendedBedtimeEndMins": "integer",
+      "preferredActivityTracker": "boolean"
+    },
+    "DailyNapDTO": {
+      "userProfilePK": "integer",
+      "deviceId": "integer",
+      "calendarDate": "string",
+      "napTimeSec": "integer",
+      "napStartTimestampGMT": "string",
+      "napEndTimestampGMT": "string",
+      "napFeedback": "string",
+      "napSource": "integer",
+      "napStartTimeOffset": "integer",
+      "napEndTimeOffset": "integer",
+      "createTimestampGMT": "string",
+      "updateTimestampGMT": "string"
+    },
+    "HrvChartDTO": {
+      "userProfilePk": "integer",
+      "hrvSummary": "HrvSummaryDTO",
+      "hrvReadings": [
+        "HrvReadingDTO"
+      ],
+      "startTimestampGMT": "string",
+      "endTimestampGMT": "string",
+      "startTimestampLocal": "string",
+      "endTimestampLocal": "string",
+      "sleepStartTimestampGMT": "string",
+      "sleepEndTimestampGMT": "string",
+      "sleepStartTimestampLocal": "string",
+      "sleepEndTimestampLocal": "string"
+    },
+    "HrvSummaryDTO": {
+      "calendarDate": "string",
+      "weeklyAvg": "integer",
+      "lastNightAvg": "integer",
+      "lastNight5MinHigh": "integer",
+      "baseline": "BaselineScoreDTO",
+      "status": "string",
+      "feedbackPhrase": "string",
+      "createTimeStamp": "string"
+    },
+    "BaselineScoreDTO": {
+      "lowUpper": "integer",
+      "balancedLow": "integer",
+      "balancedUpper": "integer",
+      "markerValue": "number"
+    },
+    "HrvDailySummaryDTO": {
+      "hrvSummaries": [
+        "HrvSummaryDTO"
+      ],
+      "userProfilePk": "integer"
+    },
+    "HeartRateZonesDTO": {
+      "trainingMethod": "string",
+      "restingHeartRateUsed": "integer",
+      "lactateThresholdHeartRateUsed": "integer",
+      "zone1Floor": "integer",
+      "zone2Floor": "integer",
+      "zone3Floor": "integer",
+      "zone4Floor": "integer",
+      "zone5Floor": "integer",
+      "maxHeartRateUsed": "integer",
+      "restingHrAutoUpdateUsed": "boolean",
+      "sport": "string"
+    },
+    "ApiDocumentListUserDailySummaryV2DTO": {
+      "data": [
+        "UserDailySummaryV2DTO"
+      ]
+    },
+    "UserDailySummaryV2DTO": {
+      "uuid": "string",
+      "userProfilePk": "integer",
+      "calendarDate": "string",
+      "source": "string",
+      "includesWellnessData": "boolean",
+      "includesActivityData": "boolean",
+      "wellnessChronology": "WellnessChronologyV2DTO",
+      "movement": "MovementV2DTO",
+      "calories": "CaloriesV2DTO",
+      "heartRate": "HeartRateV2DTO",
+      "intensityMinutes": "IntensityMinutesV2DTO",
+      "stress": "StressV2DTO",
+      "bodyBattery": "BodyBatteryV2DTO",
+      "hydration": "HydrationV2DTO",
+      "respiration": "RespirationV2DTO",
+      "pulseOx": "PulseOxV2DTO",
+      "jetLag": "JetLagV2DTO"
+    },
+    "WellnessChronologyV2DTO": {
+      "startTimestampGmt": "string",
+      "startTimestampLocal": "string",
+      "endTimestampGmt": "string",
+      "endTimestampLocal": "string",
+      "totalDurationInMillis": "integer"
+    },
+    "MovementV2DTO": {
+      "steps": "MovementValueV2DTO",
+      "pushes": "MovementValueV2DTO",
+      "floorsAscended": "MovementValueV2DTO",
+      "floorsDescended": "MovementValueV2DTO"
+    },
+    "MovementValueV2DTO": {
+      "goal": "integer",
+      "value": "integer",
+      "distanceInMeters": "number"
+    },
+    "CaloriesV2DTO": {
+      "burnedResting": "integer",
+      "burnedActive": "integer",
+      "burnedTotal": "integer",
+      "consumedGoal": "integer",
+      "consumedValue": "integer",
+      "consumedRemaining": "integer"
+    },
+    "HeartRateV2DTO": {
+      "minValue": "integer",
+      "maxValue": "integer",
+      "restingValue": "integer",
+      "alertCount": "integer"
+    },
+    "IntensityMinutesV2DTO": {
+      "goal": "integer",
+      "moderate": "integer",
+      "vigorous": "integer"
+    },
+    "StressV2DTO": {
+      "avgLevel": "integer",
+      "maxLevel": "integer",
+      "restProportion": "number",
+      "activityProportion": "number",
+      "uncategorizedProportion": "number",
+      "lowStressProportion": "number",
+      "mediumStressProportion": "number",
+      "highStressProportion": "number",
+      "qualifier": "string",
+      "totalDurationInMillis": "integer",
+      "restDurationInMillis": "integer",
+      "activityDurationInMillis": "integer",
+      "uncategorizedDurationInMillis": "integer",
+      "lowStressDurationInMillis": "integer",
+      "mediumStressDurationInMillis": "integer",
+      "highStressDurationInMillis": "integer"
+    },
+    "BodyBatteryV2DTO": {
+      "minValue": "integer",
+      "maxValue": "integer",
+      "chargedValue": "integer",
+      "drainedValue": "integer",
+      "latestValue": "integer",
+      "endOfDayValue": "integer",
+      "featureVersion": "string",
+      "dynamicFeedbackEvent": "BodyBatteryDynamicFeedbackEventDTO",
+      "endOfDayDynamicFeedbackEvent": "BodyBatteryDynamicFeedbackEventDTO",
+      "activityEvents": [
+        "BodyBatteryActivityEventV2DTO"
+      ]
+    },
+    "RespirationV2DTO": {
+      "avgValue": "integer",
+      "maxValue": "integer",
+      "minValue": "integer",
+      "latestValue": "integer",
+      "latestTimestampGmt": "string",
+      "algorithmVersion": "integer"
+    },
+    "PulseOxV2DTO": {
+      "avgValue": "integer",
+      "minValue": "integer",
+      "latestValue": "integer",
+      "latestTimestampGmt": "string",
+      "latestTimestampLocal": "string",
+      "avgAltitudeInMeters": "number"
+    },
+    "DailyHeartRateDTO": {
+      "userProfilePK": "integer",
+      "calendarDate": "ConnectDate",
+      "startTimestampGMT": "ConnectTimestamp",
+      "endTimestampGMT": "ConnectTimestamp",
+      "startTimestampLocal": "ConnectTimestamp",
+      "endTimestampLocal": "ConnectTimestamp",
+      "maxHeartRate": "integer",
+      "minHeartRate": "integer",
+      "restingHeartRate": "integer",
+      "lastSevenDaysAvgRestingHeartRate": "integer",
+      "abnormalHrThresholdValue": "integer",
+      "lowAbnormalHrThresholdValue": "integer",
+      "abnormalHRValuesArray": [
+        [
+          "object"
+        ]
+      ],
+      "heartRateValueDescriptors": [
+        "HeartRateValueDescriptorDTO"
+      ],
+      "heartRateValues": [
+        [
+          "object"
+        ]
+      ]
+    },
+    "WellnessActivitySummaryDTO": {
+      "userProfilePk": "integer",
+      "activityUuid": "GarminUUID",
+      "calendarDate": "ConnectDate",
+      "rulePK": "integer",
+      "activityName": "string",
+      "notes": "string",
+      "wellnessActivityType": "string",
+      "startTimestampGMT": "ConnectTimestamp",
+      "endTimestampGMT": "ConnectTimestamp",
+      "startTimestampLocal": "ConnectTimestamp",
+      "endTimestampLocal": "ConnectTimestamp",
+      "summaryTypeDataList": [
+        "SummaryTypeDataDTO"
+      ],
+      "timeInZoneList": [
+        "TimeInZoneDTO"
+      ],
+      "deviceMetaData": "DeviceMetaDataDTO"
+    },
+    "SummaryTypeDataDTO": {
+      "summaryType": "string",
+      "minValue": "number",
+      "maxValue": "number",
+      "avgValue": "number"
+    },
+    "TimeInZoneDTO": {
+      "zoneNumber": "integer",
+      "millisInZone": "integer",
+      "zoneLowBoundary": "integer"
+    },
+    "BodyBatteryDailyReportDTO": {
+      "date": "string",
+      "charged": "integer",
+      "drained": "integer",
+      "startTimestampGMT": "string",
+      "endTimestampGMT": "string",
+      "startTimestampLocal": "string",
+      "endTimestampLocal": "string",
+      "bodyBatteryValuesArray": [
+        [
+          "object"
+        ]
+      ],
+      "bodyBatteryValueDescriptorDTOList": [
+        "BodyBatteryValueDescriptorDTO"
+      ],
+      "bodyBatteryDynamicFeedbackEvent": "BodyBatteryDynamicFeedbackEventDTO",
+      "bodyBatteryActivityEvent": [
+        "BodyBatteryActivityEventDTO"
+      ],
+      "endOfDayBodyBatteryDynamicFeedbackEvent": "BodyBatteryDynamicFeedbackEventDTO"
+    },
+    "DailySpO2AndAcclimationDTO": {
+      "userProfilePK": "integer",
+      "calendarDate": "string",
+      "startTimestampGMT": "string",
+      "endTimestampGMT": "string",
+      "startTimestampLocal": "string",
+      "endTimestampLocal": "string",
+      "sleepStartTimestampGMT": "string",
+      "sleepEndTimestampGMT": "string",
+      "sleepStartTimestampLocal": "string",
+      "sleepEndTimestampLocal": "string",
+      "tomorrowSleepStartTimestampGMT": "string",
+      "tomorrowSleepEndTimestampGMT": "string",
+      "tomorrowSleepStartTimestampLocal": "string",
+      "tomorrowSleepEndTimestampLocal": "string",
+      "averageSpO2": "number",
+      "lowestSpO2": "integer",
+      "lastSevenDaysAvgSpO2": "number",
+      "latestSpO2": "integer",
+      "latestSpO2TimestampGMT": "string",
+      "latestSpO2TimestampLocal": "string",
+      "avgSleepSpO2": "number",
+      "avgTomorrowSleepSpO2": "number",
+      "spO2SingleValuesDescriptorList": [
+        "SPO2ValueDescriptorDTO"
+      ],
+      "spO2SingleValues": [
+        [
+          "object"
+        ]
+      ],
+      "spO2HourlyAveragesDescriptorList": [
+        "SPO2AcclimationValueDescriptorDTO"
+      ],
+      "spO2HourlyAverages": [
+        [
+          "object"
+        ]
+      ],
+      "monitoringEnvironmentValuesDescriptorList": [
+        "MonitoringEnvironmentValueDescriptorDTO"
+      ],
+      "monitoringEnvironmentValues": [
+        [
+          "object"
+        ]
+      ]
+    },
+    "ActivitySummaryDTO": {
+      "activityId": "integer",
+      "activityName": "string",
+      "activityTypeDTO": "ActivityTypeDTO",
+      "summaryDTO": "SummaryDTO",
+      "metadataDTO": "MetadataDTO",
+      "splitSummaries": [
+        "SplitSummaryDTO"
+      ]
+    },
+    "SummarizedActivityDTO": {
+      "activityId": "integer",
+      "activityName": "string",
+      "startTimeLocal": "string",
+      "startTimeGMT": "string",
+      "endTimeGMT": "string",
+      "beginTimestamp": "integer",
+      "activityType": "ActivityTypeDTO",
+      "distance": "number",
+      "duration": "number",
+      "averageHR": "number",
+      "elevationGain": "number",
+      "vO2MaxValue": "number",
+      "trainingEffectLabel": "string",
+      "aerobicTrainingEffect": "number",
+      "anaerobicTrainingEffect": "number",
+      "activityTrainingLoad": "number",
+      "hrTimeInZone_1": "number",
+      "hrTimeInZone_2": "number",
+      "hrTimeInZone_3": "number",
+      "hrTimeInZone_4": "number",
+      "hrTimeInZone_5": "number",
+      "moderateIntensityMinutes": "integer",
+      "vigorousIntensityMinutes": "integer"
+    },
+    "SummaryDTO": {
+      "startTimeGMT": "string",
+      "distance": "number",
+      "duration": "number",
+      "averageHR": "number",
+      "elevationGain": "number",
+      "trainingEffectLabel": "string",
+      "directWorkoutRpe": "integer",
+      "perceivedWorkoutEffort": "integer",
+      "trainingEffect": "number",
+      "anaerobicTrainingEffect": "number",
+      "activityTrainingLoad": "number"
+    }
+  },
+  "verifiedConversions": {
+    "SummarizedActivityDTO.distance": "meters -> km /1000",
+    "SummarizedActivityDTO.duration": "seconds",
+    "SummarizedActivityDTO.averageHR": "beats per minute",
+    "SummarizedActivityDTO.hrTimeInZone_1..5": "seconds -> minutes /60",
+    "DailySleepDTO.*SleepSeconds": "seconds -> minutes /60",
+    "DailySleepDTO.sleepTimeSeconds": "seconds -> minutes /60",
+    "TimeInZoneDTO.millisInZone": "milliseconds -> minutes /60000"
+  }
+}

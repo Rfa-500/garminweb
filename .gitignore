@@ -1,0 +1,8 @@
+.env*
+node_modules/
+*.zip
+.local/
+.openai/
+.vercel/
+scripts/inspect-garmin.mjs
+scripts/fetch-heart-rate.mjs

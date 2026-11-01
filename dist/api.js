@@ -1,0 +1,18 @@
+import {config} from './config.js';
+import {demoSnapshot,defaultGoals,demoRecommendations,validateGoals,validateSnapshot} from './data.js';
+const prefix=`cirqa:v1:${config.mode}:${config.accountScope?encodeURIComponent(config.accountScope)+':':''}`;
+const persistent=config.mode==='demo'||Boolean(config.accountScope);
+const memory=new Map();
+export function save(key,value){memory.set(key,value);if(persistent)try{localStorage.setItem(prefix+key,JSON.stringify(value));}catch{/* Storage may be unavailable. Keep this session usable. */}}
+export function clearPrivateCache(){memory.clear();if(persistent)try{for(const key of ['snapshot','goals'])localStorage.removeItem(prefix+key);}catch{}}
+function read(key,fallback,validate){try{const value=memory.get(key)??(persistent?JSON.parse(localStorage.getItem(prefix+key)):null);return value?validate(value):structuredClone(fallback);}catch{return structuredClone(fallback);}}
+export function getSavedGoals(){return read('goals',defaultGoals,validateGoals);}
+export function getSavedSnapshot(){return read('snapshot',config.mode==='demo'?demoSnapshot:null,s=>{validateSnapshot(s);if(s.mode!==config.mode)throw Error('Snapshot mode mismatch');if(config.mode==='demo'&&s.fixtureVersion!==demoSnapshot.fixtureVersion)return structuredClone(demoSnapshot);return s;});}
+async function request(path,options={}){const mutating=options.method&&!['GET','HEAD'].includes(options.method);if(mutating&&!config.csrfToken)throw Error('Missing CSRF session bootstrap');const response=await fetch(config.apiBase+path,{credentials:'same-origin',...options,headers:{'Content-Type':'application/json',...(mutating?{'X-CSRF-Token':config.csrfToken}:{}),...options.headers},signal:AbortSignal.timeout(config.requestTimeoutMs)});if(!response.ok)throw Error('Request failed');return response.status===204?null:response.json();}
+function accept(s){validateSnapshot(s);if(s.mode!==config.mode)throw Error('Snapshot mode mismatch');const previous=getSavedSnapshot();if(previous&&Date.parse(s.generatedAt)<Date.parse(previous.generatedAt))throw Error('Older snapshot');save('snapshot',s);return s;}
+export async function loadLatest(){if(config.mode==='demo')return getSavedSnapshot();return accept(await request('/snapshot'));}
+export async function loadGoals(){if(config.mode==='demo')return getSavedGoals();const g=validateGoals(await request('/goals'));save('goals',g);return g;}
+export async function persistGoals(goals){validateGoals(goals);const next=config.mode==='demo'?goals:validateGoals(await request('/goals',{method:'PUT',body:JSON.stringify(goals)}));save('goals',next);return next;}
+let inflight;
+export function refreshInsights(goals){if(inflight)return inflight;inflight=refresh(goals).finally(()=>{inflight=null;});return inflight;}
+async function refresh(goals){if(config.mode==='demo'){await new Promise(r=>setTimeout(r,1400));const s=structuredClone(getSavedSnapshot());s.generatedAt=new Date().toISOString();s.id='demo-'+Date.now();s.goalsVersion=goals.version;s.recommendations=demoRecommendations(goals);return accept(s);}const result=await request('/refresh',{method:'POST',headers:{'Idempotency-Key':crypto.randomUUID()},body:JSON.stringify({reason:'manual',goalsVersion:goals.version,dataThrough:getSavedSnapshot()?.dataThrough??null})});if(result.snapshot)return accept(result.snapshot);if(typeof result.jobId!=='string')throw Error('Invalid refresh job');for(let i=0;i<20;i++){await new Promise(r=>setTimeout(r,2000));const job=await request('/jobs/'+encodeURIComponent(result.jobId));if(job.status==='completed')return accept(job.snapshot);if(['failed','cancelled'].includes(job.status))throw Error('Refresh incomplete');}throw Error('Analysis still processing');}
