@@ -21,7 +21,8 @@ async function adapter(overrides = {}) {
   const config = { mode: 'demo', apiBase: '/api/v1', requestTimeoutMs: 12000, accountScope: null, csrfToken: null, ...overrides };
   const source = apiSource
     .replace("import {config} from './config.js';", `const config = ${JSON.stringify(config)};`)
-    .replace("from './data.js'", `from '${dataUrl}'`);
+    .replace("from './data.js'", `from '${dataUrl}'`)
+    .replace("from './personalization.js'", `from '${new URL('../dist/personalization.js',import.meta.url).href}'`);
   return import('data:text/javascript;base64,' + Buffer.from(source + `\n// instance ${moduleVersion++}`).toString('base64'));
 }
 function liveSnapshot(generatedAt = demoSnapshot.generatedAt) {

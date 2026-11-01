@@ -1,1 +1,20 @@
-{"name":"cirqa-training-dashboard","version":"2.0.0","private":true,"type":"module","scripts":{"dev":"node server.mjs","test":"node --test tests/*.test.mjs","check":"node --check dist/dashboard.js && node --check dist/analytics.js && node --check dist/api.js && node --check dist/data.js && node --check server.mjs"}}
+{
+  "name": "cirqa-training-dashboard",
+  "version": "3.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node server.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "check": "node --check dist/dashboard.js && node --check dist/experience.js && node --check dist/personalization.js && node --check dist/api.js && node --check integration/state.mjs && node --check api/handler.mjs && node --check server.mjs"
+  },
+  "dependencies": {
+    "@vercel/blob": "^2.8.2",
+    "ai": "^7.0.159"
+  },
+  "overrides": {
+    "@vercel/cli-config": {
+      "zod": "^4.6.6"
+    }
+  }
+}

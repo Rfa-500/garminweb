@@ -111,6 +111,12 @@ function normalizeActivities(input) {
       anaerobicTrainingEffect: finite(activity.anaerobicTrainingEffect, 0, 5),
       activityTrainingLoad: finite(activity.activityTrainingLoad),
       vo2max: finite(activity.vO2MaxValue, 1, 150)
+      ,movingDurationSec: finite(activity.movingDuration,0,604800),elapsedDurationSec:finite(activity.elapsedDuration,0,604800),
+      moderateMinutes:finite(activity.moderateIntensityMinutes,0,10080),vigorousMinutes:finite(activity.vigorousIntensityMinutes,0,10080),
+      averageSpeedMps:finite(activity.averageSpeed,0,100),maxSpeedMps:finite(activity.maxSpeed,0,100),
+      avgCadence:finite(activity.averageRunningCadenceInStepsPerMinute,0,400),
+      lapCount:finite(activity.lapCount,0,10000),personalRecord:activity.isPR===true,
+      automaticallyDetected:activity.isManualActivity===false&&activity.activityType?.typeKey==='auto_activity'
     });
   }
   return [...unique.values()].sort((a, b) => b.date.localeCompare(a.date));
@@ -170,7 +176,7 @@ export function normalizeGarmin(raw, goals = liveDefaultGoals, options = {}) {
     bodyBattery: metric(latest?.bodyBattery?.latestValue, '/100', observedDaily, 'bodyBattery.latestValue', [0, 100]),
     stress: metric(latest?.stress?.avgLevel, '/100', observedDaily, 'stress.avgLevel', [0, 100]),
     respiration: metric(latest?.respiration?.avgValue, 'brpm', observedDaily, 'respiration.avgValue', [0, 100]),
-    pulseOx: metric(latest?.pulseOx?.avgValue, '%', observedDaily, 'pulseOx.avgValue', [1, 100]),
+    pulseOx: finite(raw.pulseOxDay?.averageSpO2,1,100)!=null?metric(raw.pulseOxDay.averageSpO2,'%',garminGmtTimestamp(raw.pulseOxDay.endTimestampGMT),'DailySpO2AndAcclimationDTO.averageSpO2',[1,100]):metric(latest?.pulseOx?.avgValue, '%', observedDaily, 'pulseOx.avgValue', [1, 100]),
     skinTemperature: unavailable('°C from baseline', 'No verified skin-temperature field is available in this import.'),
     steps: metric(latest?.movement?.steps?.value, 'steps', observedDaily, 'movement.steps.value', [0, 200000]),
     calories: metric(latest?.calories?.burnedTotal, 'kcal', observedDaily, 'calories.burnedTotal', [0, 30000]),
@@ -184,6 +190,27 @@ export function normalizeGarmin(raw, goals = liveDefaultGoals, options = {}) {
     heartRate: heartRateSeries.length ? metric(heartRateSeries.at(-1).bpm, 'bpm', heartRateSeries.at(-1).timestamp, 'DailyHeartRateDTO.heartRateValues (latest recorded sample)', [1, 300]) : unavailable('bpm', 'No timestamped heart-rate samples imported; daily min/max/resting values are not a current reading.'),
     weeklyIntensityMinutes: { ...metric(weekIntensity, 'min', observedDaily, 'sum of daily moderate + 2 × vigorous in current local week', [0, 20160]), calculation: 'Sum of reported moderate minutes plus twice reported vigorous minutes', sampleDays: weekRows.length }
   };
+  // Explicit source fields only. No age-predicted HR zones or estimated scores.
+  for(const [key,value,unit,field,limits] of [
+    ['activeCalories',latest?.calories?.burnedActive,'kcal','calories.burnedActive',[0,30000]],
+    ['restingCalories',latest?.calories?.burnedResting,'kcal','calories.burnedResting',[0,30000]],
+    ['hydrationMl',latest?.hydration?.consumedInMl,'ml','hydration.consumedInMl',[0,30000]],
+    ['hydrationGoalMl',latest?.hydration?.goalInMl,'ml','hydration.goalInMl',[0,30000]],
+    ['minHr',latest?.heartRate?.minValue,'bpm','heartRate.minValue',[1,300]],
+    ['maxHr',latest?.heartRate?.maxValue,'bpm','heartRate.maxValue',[1,300]],
+    ['bodyBatteryCharged',latest?.bodyBattery?.chargedValue,'points','bodyBattery.chargedValue',[0,1000]],
+    ['bodyBatteryDrained',latest?.bodyBattery?.drainedValue,'points','bodyBattery.drainedValue',[0,1000]],
+    ['stepsGoal',latest?.movement?.steps?.goal,'steps','movement.steps.goal',[0,200000]],
+    ['stressRestMinutes',finite(latest?.stress?.restDurationInMillis)==null?null:latest.stress.restDurationInMillis/60000,'min','stress.restDurationInMillis / 60000',[0,1440]],
+    ['stressHighMinutes',finite(latest?.stress?.highStressDurationInMillis)==null?null:latest.stress.highStressDurationInMillis/60000,'min','stress.highStressDurationInMillis / 60000',[0,1440]]
+  ])metrics[key]=metric(value,unit,observedDaily,field,limits);
+  for(const [key,value,unit,field,limits] of [
+    ['sleepAvgHr',sleep?.avgHeartRate,'bpm','DailySleepDTO.avgHeartRate',[1,300]],
+    ['sleepRespiration',sleep?.averageRespirationValue,'brpm','DailySleepDTO.averageRespirationValue',[1,100]],
+    ['sleepPulseOx',sleep?.averageSpO2Value,'%','DailySleepDTO.averageSpO2Value',[1,100]],
+    ['sleepStress',sleep?.avgSleepStress,'/100','DailySleepDTO.avgSleepStress',[0,100]],
+    ['awakeCount',sleep?.awakeCount,'times','DailySleepDTO.awakeCount',[0,1000]]
+  ])metrics[key]=metric(value,unit,observedSleep,field,limits);
   const dailyByDate = new Map(daily.map(row => [row.calendarDate, row]));
   const history = days.map(date => {
     const day = dailyByDate.get(date);
@@ -217,7 +244,16 @@ export function normalizeGarmin(raw, goals = liveDefaultGoals, options = {}) {
       moderateIntensityMinutes: observedAt ? finite(day?.intensityMinutes?.moderate, 0, 1440) : null,
       vigorousIntensityMinutes: observedAt ? finite(day?.intensityMinutes?.vigorous, 0, 1440) : null,
       intensityMinutes: observedAt ? intensity(day) : null,
-      distanceKm: distances.length ? round(distances.reduce((a, b) => a + b, 0), 3) : null
+      distanceKm: distances.length ? round(distances.reduce((a, b) => a + b, 0), 3) : null,
+      activeCalories:observedAt?finite(day?.calories?.burnedActive):null,
+      hydrationMl:observedAt?finite(day?.hydration?.consumedInMl):null,
+      stressRestMinutes:observedAt&&finite(day?.stress?.restDurationInMillis)!=null?round(day.stress.restDurationInMillis/60000):null,
+      stressHighMinutes:observedAt&&finite(day?.stress?.highStressDurationInMillis)!=null?round(day.stress.highStressDurationInMillis/60000):null,
+      sleepAvgHr:sleepObservedAt?finite(night?.avgHeartRate,1,300):null,
+      sleepRespiration:sleepObservedAt?finite(night?.averageRespirationValue,1,100):null,
+      sleepPulseOx:sleepObservedAt?finite(night?.averageSpO2Value,1,100):null,
+      sleepStress:sleepObservedAt?finite(night?.avgSleepStress,0,100):null,
+      napMinutes:sleepObservedAt&&finite(night?.napTimeSeconds)!=null?round(night.napTimeSeconds/60):null
     };
   });
   const sleepRecord = normalizedSleepRecord(sleep);
@@ -249,5 +285,15 @@ export function normalizeGarmin(raw, goals = liveDefaultGoals, options = {}) {
   // A single imported profile can be presented directly. Multiple sport-specific
   // profiles must be selected by sport, not collapsed to an invented average.
   snapshot.zoneBoundaries = zoneProfiles.length === 1 ? zoneProfiles[0].floors : [];
+  snapshot.bodyBatterySeries=array(raw.bodyBatteryDays).flatMap(report=>{
+    const descriptors=array(report.bodyBatteryValueDescriptorDTOList);
+    const ti=descriptors.find(d=>d.bodyBatteryValueDescriptorKey==='timestamp')?.bodyBatteryValueDescriptorIndex;
+    const vi=descriptors.find(d=>d.bodyBatteryValueDescriptorKey==='bodyBatteryLevel')?.bodyBatteryValueDescriptorIndex;
+    if(!Number.isInteger(ti)||!Number.isInteger(vi))return [];
+    return array(report.bodyBatteryValuesArray).map(r=>({timestamp:garminGmtTimestamp(r[ti]),value:finite(r[vi],0,100)})).filter(p=>p.timestamp&&p.timestamp<=dataThrough&&p.value!=null);
+  }).sort((a,b)=>a.timestamp.localeCompare(b.timestamp));
+  snapshot.coverage.earliestWorkout=activities.at(-1)?.date||null;
+  snapshot.coverage.activityHistory='All activities returned by the Personal API, retained across refreshes';
+  snapshot.coverage.documentedUnavailable=['readiness','trainingStatus','recoveryHours','skinTemperature'];
   return validateSnapshot(snapshot);
 }

@@ -169,3 +169,7 @@ The shareable static build is a demo. Before deploying a private live connection
 8. Add durable job recovery, bounded provider retries/backoff, and operational logs with secret/health redaction. Check data changes every 30 minutes only after later activation.
 
 See [CONNECTION_WORKFLOW.md](CONNECTION_WORKFLOW.md) for the setup sequence and [GROK_BOT_PROMPT.md](GROK_BOT_PROMPT.md) for the future runner instructions.
+
+
+## Implemented private backend
+Vercel Authentication protects all production routes. `/config.js` is rewritten to a private bootstrap that sets the signed application session and supplies a CSRF token. GET `/api/v1/snapshot`, `/goals`, and `/profile` read private state. PUT `/goals` and `/profile` validate increasing versions. POST `/refresh` accepts `reason: manual|check` and returns `{snapshot}`; no job polling is needed for this synchronous backend. Quiet checks are limited to once per 30 minutes; manual refreshes are explicit. Blob writes use ETags and conflicting setting edits return 409. AI is optional and disabled by default.

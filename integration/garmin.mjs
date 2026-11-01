@@ -1,7 +1,7 @@
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
 const BASE='https://personal.connectapi.garmin.com';
 let accessToken,expiresAt=0;
-async function token(){if(accessToken&&Date.now()<expiresAt)return accessToken;const env=await readFile(new URL('../.env.local',import.meta.url),'utf8');const key=env.match(/^GARMIN_PERSONAL_API_KEY=(.+)$/m)?.[1]?.trim();if(!key)throw Error('Garmin secret is missing');const response=await fetch(BASE+'/personalapitoken-service/personal-api/personal-api-key/token',{method:'POST',headers:{Authorization:'ApiKey '+key},signal:AbortSignal.timeout(20000),redirect:'error'});if(!response.ok)throw Error('Garmin authentication HTTP '+response.status);accessToken=(await response.text()).trim();expiresAt=Date.now()+3600000;return accessToken;}
+async function token(){if(accessToken&&Date.now()<expiresAt)return accessToken;let key=process.env.GARMIN_PERSONAL_API_KEY;if(!key){const env=await readFile(new URL('../.env.local',import.meta.url),'utf8');key=env.match(/^GARMIN_PERSONAL_API_KEY=(.+)$/m)?.[1]?.trim();}if(!key)throw Error('Garmin secret is missing');const response=await fetch(BASE+'/personalapitoken-service/personal-api/personal-api-key/token',{method:'POST',headers:{Authorization:'ApiKey '+key},signal:AbortSignal.timeout(20000),redirect:'error'});if(!response.ok)throw Error('Garmin authentication HTTP '+response.status);accessToken=(await response.text()).trim();expiresAt=Date.now()+3600000;return accessToken;}
 export async function garminGet(path){if(!path.startsWith('/')||path.startsWith('//'))throw Error('Invalid Garmin path');const response=await fetch(BASE+path,{headers:{Authorization:'Bearer '+await token()},signal:AbortSignal.timeout(20000),redirect:'error'});if(!response.ok){if(response.status===401){accessToken=null;expiresAt=0;}throw Error('Garmin data HTTP '+response.status);}return response.status===204?null:response.json();}
 
 const calendarDate=value=>typeof value==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(value)&&Number.isFinite(Date.parse(value))&&new Date(value).toISOString().slice(0,10)===value;
@@ -67,21 +67,43 @@ export async function collectHeartRateDays({activities,endDate,previous=[],reque
   return {days:[...retained.values()].sort((a,b)=>a.calendarDate.localeCompare(b.calendarDate)),errors,requestedDates};
 }
 
-export async function collectGarmin(endDate=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Panama'}).format(new Date())){
+export async function collectGarmin(endDate=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Panama'}).format(new Date()),options={}){
+  const request=options.request||garminGet;
   const from=new Date(endDate+'T12:00:00Z');from.setUTCDate(from.getUTCDate()-27);const startDate=from.toISOString().slice(0,10);
   const endpoints={daily:`/usersummary-service/v2/dailysummaries?startDate=${startDate}&endDate=${endDate}`,sleep:`/sleep-service/sleep/dailySleep?date=${endDate}`,sleepHistory:`/sleep-service/sleep/dailySleepSummariesByDate?startDate=${startDate}&endDate=${endDate}`,hrv:`/hrv-service/hrv/${endDate}`,hrvHistory:`/hrv-service/hrv/daily/${startDate}/${endDate}`,activities:`/activitylist-service/activities/search/activities?start=0&limit=100&startDate=${startDate}&endDate=${endDate}`,zones:'/biometric-service/heartRateZones/v2',autoActivities:`/wellnessactivity-service/activity/summary/range/${startDate}/${endDate}`};
-  let previous={};try{previous=JSON.parse(await readFile(new URL('../.local/garmin-raw.json',import.meta.url),'utf8'));}catch{}
+  endpoints.activities='/activitylist-service/activities/search/activities?start=0&limit=100';
+  endpoints.bodyBatteryDays=`/wellness-service/wellness/bodyBattery/reports/daily?startDate=${endDate}&endDate=${endDate}`;
+  endpoints.pulseOxDay=`/wellness-service/wellness/daily/spo2acclimation/${endDate}`;
+  let previous=options.previous||{};if(!options.previous)try{previous=JSON.parse(await readFile(new URL('../.local/garmin-raw.json',import.meta.url),'utf8'));}catch{}
   const result={fetchedAt:new Date().toISOString(),startDate,endDate,errors:{}};
   for(const[name,path]of Object.entries(endpoints)){
     try{
-      let next=await garminGet(path);
-      if(name==='activities'&&Array.isArray(next)&&next.length===100){let offset=100;while(offset<=1000){const page=await garminGet(path.replace('start=0','start='+offset));if(!Array.isArray(page))throw Error('Invalid activities page');next.push(...page);if(page.length<100)break;offset+=100;}if(offset>1000)throw Error('Activity pagination limit reached');}
+      let next=await request(path);
+      if(name==='activities'&&Array.isArray(next)&&next.length===100){let offset=100;while(offset<=1000){const page=await request(path.replace('start=0','start='+offset));if(!Array.isArray(page))throw Error('Invalid activities page');next.push(...page);if(page.length<100)break;offset+=100;}if(offset>1000)throw Error('Activity pagination limit reached');}
       const empty=next==null||(Array.isArray(next)&&next.length===0)||(name==='daily'&&!next.data?.length)||(name==='hrv'&&!next.hrvSummary);
       result[name]=empty&&previous[name]!=null?previous[name]:next;
     }catch(e){result.errors[name]=e.message;if(previous[name]!=null)result[name]=previous[name];}
   }
   if(!result.daily?.data?.length)throw Error('Daily data not available; saved snapshot retained');
-  const heartRate=await collectHeartRateDays({activities:result.activities,endDate,previous:previous.heartRateDays});
+  const heartRate=await collectHeartRateDays({activities:result.activities,endDate,previous:previous.heartRateDays,request});
   result.heartRateDays=heartRate.days;Object.assign(result.errors,heartRate.errors);
-  await mkdir(new URL('../.local/',import.meta.url),{recursive:true});await writeFile(new URL('../.local/garmin-raw.json',import.meta.url),JSON.stringify(result,null,2),{mode:0o600});return result;
+  if(!previous.historyBackfillComplete){
+    const oldest=new Date(Date.parse(endDate)-89*86400000).toISOString().slice(0,10);
+    let complete=true;
+    for(const [name,path] of [
+      ['daily',`/usersummary-service/v2/dailysummaries?startDate=${oldest}&endDate=${endDate}`],
+      ['hrvHistory',`/hrv-service/hrv/daily/${oldest}/${endDate}`],
+      ...[0,31].map(offset=>{const a=new Date(Date.parse(oldest)+offset*86400000).toISOString().slice(0,10),b=new Date(Date.parse(oldest)+(offset+30)*86400000).toISOString().slice(0,10);return ['olderSleep',`/sleep-service/sleep/dailySleepSummariesByDate?startDate=${a}&endDate=${b}`];})
+    ])try{const more=await request(path);if(name==='daily'&&more?.data?.length)result.daily=more;else if(name==='hrvHistory'&&more?.hrvSummaries?.length)result.hrvHistory=more;else if(name==='olderSleep'&&Array.isArray(more))result.sleepHistory=[...more,...(result.sleepHistory||[])];}catch{complete=false;}
+    result.historyBackfillComplete=complete;
+  }else result.historyBackfillComplete=true;
+  // Keep older workouts and revised records, keyed by Garmin's stable activity ID.
+  result.activities=[...new Map([...(previous.activities||[]),...(result.activities||[])].map(a=>[String(a.activityId),a])).values()];
+  const mergeDays=(oldRows,newRows,key='calendarDate')=>[...new Map([...(oldRows||[]),...(newRows||[])].filter(r=>r?.[key]>=new Date(Date.parse(endDate)-365*86400000).toISOString().slice(0,10)).map(r=>[r[key],r])).values()];
+  result.daily={data:mergeDays(previous.daily?.data,result.daily?.data)};
+  result.sleepHistory=mergeDays(previous.sleepHistory,result.sleepHistory);
+  result.hrvHistory={hrvSummaries:mergeDays(previous.hrvHistory?.hrvSummaries,result.hrvHistory?.hrvSummaries)};
+  result.bodyBatteryDays=mergeDays(previous.bodyBatteryDays,result.bodyBatteryDays,'date');
+  result.startDate=result.daily.data.map(r=>r.calendarDate).sort()[0]||startDate;
+  if(options.persist!==false){await mkdir(new URL('../.local/',import.meta.url),{recursive:true});await writeFile(new URL('../.local/garmin-raw.json',import.meta.url),JSON.stringify(result,null,2),{mode:0o600});}return result;
 }

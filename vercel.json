@@ -1,7 +1,37 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
-  "installCommand": "",
+  "installCommand": "npm ci",
   "buildCommand": "npm run check && npm test",
-  "outputDirectory": "dist"
+  "outputDirectory": "dist",
+  "rewrites": [
+    {
+      "source": "/config.js",
+      "destination": "/api/handler?route=config"
+    },
+    {
+      "source": "/api/v1/:route",
+      "destination": "/api/handler?route=:route"
+    }
+  ],
+  "functions": {
+    "api/handler.mjs": {
+      "maxDuration": 120
+    }
+  },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Referrer-Policy",
+          "value": "no-referrer"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        }
+      ]
+    }
+  ]
 }

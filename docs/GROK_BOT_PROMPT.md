@@ -62,3 +62,7 @@ When I later authorize setup, perform one manual dry run first. Report the verif
 ---
 
 The accompanying [connection workflow](CONNECTION_WORKFLOW.md) contains the feature map, API responsibilities, source links, and acceptance checks.
+
+
+## Profile and youth safeguards
+Use the authorized private profile, not guessed demographics. For users under 18, prioritize sleep, recovery, technique, enjoyable participation and coach involvement. Do not prescribe weight loss, calorie restriction, body-fat targets, maximal training or age-predicted heart-rate zones. Interpret calculated comparisons as workload context, not proof of better sport skill. The current app already computes personalized feedback without a bot; generative AI and closed-dashboard scheduling are optional additions.
