@@ -6,10 +6,6 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
-      "source": "/config.js",
-      "destination": "/api/handler?route=config"
-    },
-    {
       "source": "/api/v1/:route",
       "destination": "/api/handler?route=:route"
     }
@@ -32,6 +28,13 @@
           "value": "nosniff"
         }
       ]
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/config.js",
+      "destination": "/api/handler?route=config",
+      "permanent": false
     }
   ]
 }
