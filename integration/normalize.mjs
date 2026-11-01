@@ -1,3 +1,4 @@
+import {mergeArchive} from './archive.mjs';
 import { randomUUID } from 'node:crypto';
 import { validateGoals, validateSnapshot } from '../dist/data.js';
 
@@ -295,5 +296,5 @@ export function normalizeGarmin(raw, goals = liveDefaultGoals, options = {}) {
   snapshot.coverage.earliestWorkout=activities.at(-1)?.date||null;
   snapshot.coverage.activityHistory='All activities returned by the Personal API, retained across refreshes';
   snapshot.coverage.documentedUnavailable=['readiness','trainingStatus','recoveryHours','skinTemperature'];
-  return validateSnapshot(snapshot);
+  return validateSnapshot(mergeArchive(snapshot,raw.archive));
 }

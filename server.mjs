@@ -1,3 +1,4 @@
+import {combineArchives} from './integration/archive.mjs';
 import http from 'node:http';
 import {readFile,writeFile,rename,mkdir} from 'node:fs/promises';
 import path from 'node:path';
@@ -13,7 +14,7 @@ const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=
 let refreshJob;
 async function privateJson(name,fallback=null){try{return JSON.parse(await readFile(path.join(privateRoot,name),'utf8'));}catch{return fallback;}}
 async function atomic(name,value){await mkdir(privateRoot,{recursive:true});const tmp=path.join(privateRoot,name+'.tmp');await writeFile(tmp,JSON.stringify(value,null,2),{mode:0o600});await rename(tmp,path.join(privateRoot,name));}
-async function payload(req){let text='';for await(const chunk of req){text+=chunk;if(text.length>16000)throw Error('Request too large');}return JSON.parse(text);}
+async function payload(req){let text='';for await(const chunk of req){text+=chunk;if(text.length>3800000)throw Error('Request too large');}return JSON.parse(text);}
 function send(res,status,body){res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store'}).end(JSON.stringify(body));}
 http.createServer(async(req,res)=>{
   res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('Referrer-Policy','same-origin');res.setHeader('Cross-Origin-Resource-Policy','same-origin');
@@ -30,6 +31,7 @@ http.createServer(async(req,res)=>{
       if(pathname==='/api/v1/profile'&&req.method==='PUT'){const current=await privateJson('profile.json',emptyProfile);const next=validateProfile(await payload(req));if(next.version!==current.version+1){send(res,409,{error:'Reload current profile'});return;}await atomic('profile.json',next);send(res,200,next);return;}
       if(pathname==='/api/v1/goals'&&req.method==='GET'){send(res,200,await privateJson('goals.json',defaults));return;}
       if(pathname==='/api/v1/goals'&&req.method==='PUT'){const current=await privateJson('goals.json',defaults);const next=validateGoals(await payload(req));if(next.version!==current.version+1){send(res,409,{error:'Reload the current goals before saving'});return;}await atomic('goals.json',next);send(res,200,next);return;}
+      if(pathname==='/api/v1/import'&&req.method==='POST'){const raw=await privateJson('garmin-raw.json');raw.archive=combineArchives(raw.archive,await payload(req));const next=buildState(raw,await privateJson('goals.json',defaults),await privateJson('profile.json',emptyProfile));await atomic('garmin-raw.json',raw);await atomic('snapshot.json',next.snapshot);send(res,200,{snapshot:next.snapshot});return;}
       if(pathname==='/api/v1/refresh'&&req.method==='POST'){
         const body=await payload(req);
         if(!refreshJob)refreshJob=(async()=>{

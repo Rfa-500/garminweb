@@ -104,6 +104,7 @@ export async function collectGarmin(endDate=new Intl.DateTimeFormat('en-CA',{tim
   result.sleepHistory=mergeDays(previous.sleepHistory,result.sleepHistory);
   result.hrvHistory={hrvSummaries:mergeDays(previous.hrvHistory?.hrvSummaries,result.hrvHistory?.hrvSummaries)};
   result.bodyBatteryDays=mergeDays(previous.bodyBatteryDays,result.bodyBatteryDays,'date');
+  if(previous.archive)result.archive=previous.archive;
   result.startDate=result.daily.data.map(r=>r.calendarDate).sort()[0]||startDate;
   if(options.persist!==false){await mkdir(new URL('../.local/',import.meta.url),{recursive:true});await writeFile(new URL('../.local/garmin-raw.json',import.meta.url),JSON.stringify(result,null,2),{mode:0o600});}return result;
 }

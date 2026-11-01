@@ -90,7 +90,7 @@ export function validateSnapshot(s){
   if(typeof s.timezone!=='string')fail('Invalid time zone');
   try{new Intl.DateTimeFormat('en',{timeZone:s.timezone}).format();}catch{fail('Invalid time zone');}
   if(!s.device||typeof s.device.model!=='string'||(s.device.lastSyncAt!=null&&(!date(s.device.lastSyncAt)||Date.parse(s.device.lastSyncAt)>Date.parse(s.dataThrough))))fail('Invalid device');
-  const ranges={readiness:[0,100],sleepScore:[0,100],bodyBattery:[0,100],stress:[0,100],pulseOx:[0,100],sleepMinutes:[0,1440],sleepNeedMinutes:[0,1440],napMinutes:[0,1440],hrv:[0,1000],restingHr:[1,300],heartRate:[1,300],respiration:[0,100],skinTemperature:[-15,15],steps:[0,200000],calories:[0,30000],vo2max:[0,150],recoveryHours:[0,336],intensityMinutes:[0,2880],weeklyIntensityMinutes:[0,20160]};
+  const ranges={readiness:[0,100],sleepScore:[0,100],bodyBattery:[0,100],stress:[0,100],pulseOx:[0,100],sleepMinutes:[0,1440],sleepNeedMinutes:[0,1440],napMinutes:[0,1440],hrv:[0,1000],restingHr:[1,300],heartRate:[1,300],respiration:[0,100],skinTemperature:[-15,15],skinTemperatureAbsolute:[20,45],steps:[0,200000],calories:[0,30000],vo2max:[0,150],recoveryHours:[0,336],intensityMinutes:[0,2880],weeklyIntensityMinutes:[0,20160]};
   for(const [key,v] of Object.entries(s.metrics)){
     if(!v||!['available','unavailable','not-authorized','unsupported'].includes(v.status)||typeof v.unit!=='string')fail('Invalid metric');
     if(v.status!=='available'){if(v.value!=null)fail('Unavailable metric must have null value');continue;}
